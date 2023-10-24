@@ -164,6 +164,10 @@ module.exports.verifyLoginCode = asyncHandler(async (_, args) => {
 module.exports.createPin = asyncHandler(async (_, args, context) => {
   const user = await User.findById(context.user.id);
 
+  if (user.isPinSet) {
+    return new ErrorResponse(400, 'Pin already set');
+  }
+
   const pin = await generateEncryptedPin(args.pin);
   user.pin = pin;
   user.oldPins = [pin];

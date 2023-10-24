@@ -171,6 +171,7 @@ module.exports.createPin = asyncHandler(async (_, args, context) => {
   const pin = await generateEncryptedPin(args.pin);
   user.pin = pin;
   user.oldPins = [pin];
+  user.isPinSet = true;
   await user.save();
 
   return new SuccessResponse(200, true);

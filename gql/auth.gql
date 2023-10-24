@@ -1,0 +1,40 @@
+extend type Mutation {
+  auth_signup_sendCode(
+    name: String!
+    phone: String!
+    email: String!
+    address: String!
+    password: String!
+  ): DefaultResponse!
+  auth_signup_verifyCode(token: String!, code: String!): UserResponse!
+  auth_login_sendCode(email: String!, password: String!): DefaultResponse!
+  auth_login_verifyCode(code: String!, token: String!): UserResponse!
+  auth_pin_create(pin: String!): DefaultResponse!
+  auth_pin_verify(pin: String!): DefaultResponse!
+  auth_resetPin_sendCode: DefaultResponse!
+  auth_resetPin_verifyCode(token: String!, code: String!): DefaultResponse!
+  auth_resetPin(token: String!, pin: String!): DefaultResponse!
+  auth_resetPassword_sendCode(email: String!): DefaultResponse!
+  auth_resetPassword_verifyCode(token: String!, code: String!): DefaultResponse!
+  auth_resetPassword(token: String!, password: String!): DefaultResponse!
+}
+
+type User {
+  _id: ID!
+  name: String!
+  phone: String!
+  email: String!
+  address: String!
+  isPinSet: Boolean!
+}
+
+type UserResponse {
+  code: String!
+  success: Boolean!
+  data: User
+  token: String
+}
+
+input UserFilter {
+  username: String
+}

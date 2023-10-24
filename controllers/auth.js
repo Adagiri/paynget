@@ -275,6 +275,7 @@ module.exports.resetPin = asyncHandler(async (_, args) => {
 
   user.pin = newPin;
   user.oldPins = [...user.oldPins, newPin];
+  user.isPinSet = true;
   user.resetPinTokenExpiry = undefined;
   user.resetPinToken = undefined;
   user.resetPinCode = undefined;

@@ -1,15 +1,32 @@
+extend type Query {
+  "Get Logged-in User"
+  user: User!
+  user_addCard_trigger: AddCardResponse!
+}
+
 extend type Mutation {
+  user_edit(name: String!, phone: String!, dob: Date): UserResponse!
   user_delete: DefaultResponse!
   user_deleteByEmail(email: String!): DefaultResponse!
+  user_addBank(
+    accountNumber: String!
+    bankCode: String!
+    bankName: String!
+  ): UserResponse!
+  user_deleteBank(bankId: ID!): UserResponse!
+  user_deleteCard(cardId: ID!): UserResponse!
 }
 
 type User {
   _id: ID!
+  dob: Date
   name: String!
   phone: String!
   email: String!
   address: String!
   isPinSet: Boolean!
+  banks: [Bank!]!
+  cards: [Card!]!
 }
 
 type UserResponse {
@@ -17,6 +34,38 @@ type UserResponse {
   success: Boolean!
   data: User
   token: String
+}
+
+type Card {
+  _id: ID!
+  expMonth: String!
+  brand: String!
+  expYear: String!
+  bin: String!
+  last4: String!
+}
+
+type Bank {
+  _id: ID!
+  accountNumber: String!
+  accountName: String!
+  bankCode: String!
+  bankName: String!
+}
+
+type AddCardResponse {
+  name: String!
+  amount: Float!
+  email: String!
+  description: String!
+  reference: String!
+  channels: [String!]!
+  metadata: AddCardMetaData!
+}
+
+type AddCardMetaData {
+  userId: String!
+  description: String!
 }
 
 input UserFilter {

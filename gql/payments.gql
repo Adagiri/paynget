@@ -1,0 +1,16 @@
+extend type Query {
+  payment_initializeTransaction(
+    channels: [PaymentChannel]!
+    amount: Float!
+    description: PaymentDescription!
+  ): String!
+}
+
+enum PaymentChannel {
+  card
+  bank_transfer
+}
+
+enum PaymentDescription {
+  Add_Card
+}

@@ -17,6 +17,7 @@ const errorHandler = require('./middleware/error');
 const contextHandler = require('./utils/context');
 
 const { connectDB } = require('./config/db');
+const { initializeFirebaseAdmin } = require('./services/GoogleService');
 
 // Pull out all schemas and resolvers
 const typesArray = loadFilesSync(path.join(__dirname, '**/*.gql'));
@@ -34,6 +35,9 @@ const httpServer = createServer(app);
 async function startApolloServer() {
   // Connect to the database
   await connectDB();
+
+  // Connect to firebase
+  // await initializeFirebaseAdmin();
 
   // Start the apollo server
   const server = new ApolloServer({

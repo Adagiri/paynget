@@ -1,10 +1,10 @@
-const AWS = require('aws-sdk');
+const { ses } = require('../services/AwsService');
 
 const generateEmailArguments = (from, to, subject, message) => {
   const mainEmail = process.env.MAIN_EMAIL;
 
   if (!from) {
-    from = `PaynGet <${mainEmail}>`;
+    from = `Payget <${mainEmail}>`;
   }
 
   return {
@@ -24,19 +24,11 @@ const generateEmailArguments = (from, to, subject, message) => {
       },
     },
     Source: from,
-    ReplyToAddresses: ['no-reply@paynget.com'],
+    ReplyToAddresses: ['no-reply@payget.com'],
   };
 };
 
 const sendEmail = (params) => {
-  const credentials = {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_KEY,
-  };
-  const ses = new AWS.SES({
-    region: 'us-east-1',
-    credentials,
-  });
   return ses.sendEmail(params).promise();
 };
 

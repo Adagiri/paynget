@@ -12,33 +12,6 @@ const getKeyBuffer = (key) => {
   return Buffer.alloc(keyLength, key, 'utf-8');
 };
 
-module.exports.generateEmailArguments = (from, to, subject, message) => {
-  const mainEmail = process.env.MAIN_EMAIL;
-  if (!from) {
-    from = `Ec2DevTools <${mainEmail}>`;
-  }
-
-  return {
-    Destination: {
-      ToAddresses: typeof to === 'string' ? [to] : to,
-    },
-    Message: {
-      Body: {
-        Html: {
-          Charset: 'UTF-8',
-          Data: message,
-        },
-      },
-      Subject: {
-        Charset: 'UTF-8',
-        Data: subject,
-      },
-    },
-    Source: from,
-    ReplyToAddresses: ['no-reply@ec2devtools.com'],
-  };
-};
-
 module.exports.generateRandomString = (n) => {
   const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let randomString = '';
@@ -184,4 +157,11 @@ module.exports.confirmPassword = async function (
 
 module.exports.confirmPin = async function (originalPin, inputedPin) {
   return bcrypt.compare(inputedPin, originalPin);
+};
+
+module.exports.createWebhookHash = (secretKey, payload) => {
+  return crypto
+    .createHmac('sha512', secretKey)
+    .update(JSON.stringify(payload))
+    .digest('hex');
 };

@@ -43,6 +43,10 @@ const UserSchema = new mongoose.Schema({
     required: true,
   },
 
+  dob: {
+    type: Date,
+  },
+
   pin: {
     type: String,
   },
@@ -55,6 +59,27 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+
+  cards: [
+    {
+      expMonth: String,
+      expYear: String,
+      brand: String,
+      token: String,
+      email: String,
+      bin: String,
+      last4: String,
+    },
+  ],
+
+  banks: [
+    {
+      accountNumber: String,
+      accountName: String,
+      bankCode: String,
+      bankName: String,
+    },
+  ],
 
   signupCode: String,
   signupToken: String,

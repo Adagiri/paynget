@@ -6,11 +6,10 @@ Authentication
 - Forgot Password _done_
 
 User Data Management
-- Basic Profile Info
-- Card Management
+- edit profile - date, email, dob, phone _done_
+- add card, delete card _done_
+- add bank, delete bank _done_
 
-Notification Setup
-Chat Implementation Setup
 
 
 *Phase 2:*

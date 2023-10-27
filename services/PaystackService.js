@@ -45,7 +45,7 @@ module.exports.initialiseTransaction = async (
     return response.data.data;
   } catch (error) {
     console.log('Error Occured Whilst Initiating Transaction: ', error);
-    throw error.response?.data;
+    throw error.response?.data.message;
   }
 };
 
@@ -81,7 +81,7 @@ module.exports.createTransferRecipient = async (
     return response.data.data.recipient_code;
   } catch (error) {
     console.log('Error Occured Whilst Creating Transfer Recipient: ', error);
-    throw error.response?.data;
+    throw error.response?.data.message;
   }
 };
 
@@ -122,7 +122,7 @@ module.exports.disburseSingle = async (amount, reason, recipient) => {
 
       throw new Error('Please retry in 30 minutes');
     }
-    throw error.response?.data;
+    throw error.response?.data.message;
   }
 };
 
@@ -144,7 +144,7 @@ module.exports.getBanks = async () => {
   } catch (error) {
     console.log('Error Occured Whilst Fetching Banks: ', error);
 
-    throw error.response?.data;
+    throw error.response?.data.message;
   }
 };
 
@@ -166,7 +166,7 @@ module.exports.getTransferBalance = async () => {
   } catch (error) {
     console.log('Error Occured Whilst Fetching Banks: ', error);
 
-    throw error.response?.data;
+    throw error.response?.data.message;
   }
 };
 

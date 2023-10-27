@@ -22,3 +22,9 @@ module.exports.initializePaymentTransaction = asyncHandler(
     return response.authorization_url;
   }
 );
+
+module.exports.getBanks = asyncHandler(async (_, args, context) => {
+  const banks = await PaystackService.getBanks();
+
+  return banks.map((bank) => ({ name: bank.name, code: bank.code }));
+});

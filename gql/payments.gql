@@ -4,6 +4,12 @@ extend type Query {
     amount: Float!
     description: PaymentDescription!
   ): String!
+  payment_getBanks: [GeneralBank]
+}
+
+type GeneralBank {
+  name: String!
+  code: String!
 }
 
 enum PaymentChannel {

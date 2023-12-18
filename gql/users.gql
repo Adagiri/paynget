@@ -1,12 +1,14 @@
 extend type Query {
   "Get Logged-in User"
   user: User!
-  user_addCard_trigger: AddCardResponse!
+  user_addCard_trigger: PaymentTriggerResponse!
+  user_topupWallet_trigger(amount: Float!): PaymentTriggerResponse!
 }
 
 extend type Mutation {
   user_edit(name: String!, phone: String!, dob: Date): UserResponse!
   user_delete: DefaultResponse!
+
   user_deleteByEmail(email: String!): DefaultResponse!
   user_addBank(
     accountNumber: String!
@@ -15,6 +17,7 @@ extend type Mutation {
   ): UserResponse!
   user_deleteBank(bankId: ID!): UserResponse!
   user_deleteCard(cardId: ID!): UserResponse!
+  user_topupWallet_savedCard(amount: Float!, cardId: ID!): UserResponse!
 }
 
 type User {
@@ -27,6 +30,7 @@ type User {
   isPinSet: Boolean!
   banks: [Bank!]!
   cards: [Card!]!
+  walletBalance: Float!
 }
 
 type UserResponse {
@@ -53,9 +57,13 @@ type Bank {
   bankName: String!
 }
 
-type AddCardResponse {
+type PaymentTriggerResponse {
   name: String!
-  amount: Float!
+  "Amount + payment provider charge - in kobo"
+  transactionAmountInKobo: Float!
+  "Payment provider charge"
+  ppc: Float!
+  "Amount without payment provider charge"
   email: String!
   description: String!
   reference: String!
@@ -66,6 +74,7 @@ type AddCardResponse {
 type AddCardMetaData {
   userId: String!
   description: String!
+  amount: Float!
 }
 
 input UserFilter {

@@ -1,8 +1,15 @@
+const mongoose = require('mongoose');
 const asyncHandler = require('../middleware/async');
 const User = require('../models/User');
 const PaystackService = require('../services/PaystackService');
-const { generateRandomNumbers } = require('../utils/general');
+const {
+  generateRandomNumbers,
+  decryptWalletBalance,
+  decrypt,
+  encryptNewWalletBalance,
+} = require('../utils/general');
 const { ErrorResponse, SuccessResponse } = require('../utils/responses');
+const Transaction = require('../models/Transaction');
 
 module.exports.getAllUsers = asyncHandler(async (_, args) => {
   const { filter, sort, skip, limit } = getQueryArguments(args);
@@ -11,6 +18,8 @@ module.exports.getAllUsers = asyncHandler(async (_, args) => {
 
   users = users.map((user) => {
     user.id = user._id;
+    user.walletBalance = decryptWalletBalance(user.walletBalance);
+
     return user;
   });
 
@@ -24,12 +33,15 @@ module.exports.getUserById = asyncHandler(async (_, args) => {
     return new ErrorResponse(400, `User with id: ${args.userId} not found`);
   }
 
+  user.walletBalance = decryptWalletBalance(user.walletBalance);
+
   return user;
 });
 
 module.exports.getLoggedInUser = asyncHandler(async (_, args, context) => {
   const user = await User.findById(context.user.id);
-  console.log(user);
+  user.walletBalance = decryptWalletBalance(user.walletBalance);
+
   return user;
 });
 
@@ -63,6 +75,7 @@ module.exports.editUser = asyncHandler(async (_, args, context) => {
   args.dob && (user.dob = args.dob);
 
   await user.save();
+  user.walletBalance = decryptWalletBalance(user.walletBalance);
 
   return new SuccessResponse(200, true, user);
 });
@@ -93,6 +106,7 @@ module.exports.addBank = asyncHandler(async (_, args, context) => {
 
   user.banks.push(bank);
   await user.save();
+  user.walletBalance = decryptWalletBalance(user.walletBalance);
 
   return new SuccessResponse(200, true, user);
 });
@@ -104,16 +118,18 @@ module.exports.deleteBank = asyncHandler(async (_, args, context) => {
 
   user.banks = user.banks.filter((bank) => String(bank._id) !== bankId);
   await user.save();
+  user.walletBalance = decryptWalletBalance(user.walletBalance);
 
   return new SuccessResponse(200, true, user);
 });
 
 module.exports.triggerAddCard = asyncHandler(async (_, args, context) => {
   const user = await User.findById(context.user.id);
-
+  const amountToKobo = 100 * 100; // 100 NGN to kobo
   const response = {
     name: user.name,
-    amount: 10000, // 100 NGN to kobo
+    transactionAmountInKobo: amountToKobo,
+    ppc: 0,
     email: user.email,
     description: 'Add_Card',
     reference: generateRandomNumbers(20),
@@ -121,6 +137,7 @@ module.exports.triggerAddCard = asyncHandler(async (_, args, context) => {
     metadata: {
       userId: user._id,
       description: 'Add_Card',
+      amount: 100,
     },
   };
 
@@ -134,6 +151,88 @@ module.exports.deleteCard = asyncHandler(async (_, args, context) => {
 
   user.cards = user.cards.filter((card) => String(card._id) !== cardId);
   await user.save();
+  user.walletBalance = decryptWalletBalance(user.walletBalance);
 
   return new SuccessResponse(200, true, user);
 });
+
+module.exports.triggerWalletTopup = asyncHandler(async (_, args, context) => {
+  const user = await User.findById(context.user.id);
+  let amount = args.amount;
+
+  const paymentProviderCharge = PaystackService.calculatePaystackCharge(amount);
+  let totalAmount = amount + paymentProviderCharge;
+
+  totalAmount = Math.ceil(totalAmount * 100); // Converted to kobo
+
+  const response = {
+    name: user.name,
+    transactionAmountInKobo: totalAmount,
+    ppc: Math.ceil(paymentProviderCharge),
+    email: user.email,
+    description: 'Topup_Wallet',
+    reference: generateRandomNumbers(20),
+    channels: ['card', 'bank_transfer'],
+    metadata: {
+      userId: user._id,
+      description: 'Topup_Wallet',
+      amount: amount,
+    },
+  };
+
+  return response;
+});
+
+module.exports.topupWalletViaSavedCard = asyncHandler(
+  async (_, args, context) => {
+    const user = await User.findById(context.user.id);
+    let amount = args.amount;
+    const cardId = args.cardId;
+
+    const card = user.cards.find((card) => String(card._id) === cardId);
+
+    if (!card) {
+      return new ErrorResponse(404, `Card with id '${cardId}' not found`);
+    }
+
+    const paymentProviderCharge =
+      PaystackService.calculatePaystackCharge(amount);
+    let totalAmount = Math.ceil(amount + paymentProviderCharge);
+    const cardAuthorizationToken = decrypt(card.token);
+
+    const charge = await PaystackService.chargeCard({
+      amount: totalAmount,
+      email: user.email,
+      cardAuthorizationToken: cardAuthorizationToken,
+    });
+
+    const session = await mongoose.startSession();
+    await session.withTransaction(async () => {
+      // Save transaction
+      await Transaction.create(
+        [
+          {
+            user: user._id,
+            amount: amount,
+            transactionAmount: charge.amount,
+            channel: 'card',
+            reference: charge.reference,
+            description: 'Topup_Wallet',
+            paymentHandler: 'Paystack',
+          },
+        ],
+        { session }
+      );
+
+      const encryptedBalance = user.walletBalance;
+      const increment = amount;
+      user.walletBalance = encryptNewWalletBalance(encryptedBalance, increment);
+      await user.save({ session });
+    });
+
+    session.endSession();
+
+    user.walletBalance = decrypt(user.walletBalance);
+    return new SuccessResponse(200, true, user);
+  }
+);

@@ -4,12 +4,27 @@ extend type Query {
     amount: Float!
     description: PaymentDescription!
   ): String!
+
+  payment_fetchCharge(amount: Float!): PaymentChargeResponse!
   payment_getBanks: [GeneralBank]
+}
+
+extend type Mutation {
+  payment_withdrawFromWalletToBank(amount: Float!, bankId: ID!): DefaultResponse!
 }
 
 type GeneralBank {
   name: String!
   code: String!
+}
+
+type PaymentChargeResponse {
+  "Amount + payment provider charge"
+  transactionAmount: Float!
+  "Amount without charge"
+  amount: Float!
+  "Payment provider charge"
+  ppc: Float!
 }
 
 enum PaymentChannel {
@@ -19,4 +34,5 @@ enum PaymentChannel {
 
 enum PaymentDescription {
   Add_Card
+  Topup_Wallet
 }

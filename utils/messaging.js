@@ -1,6 +1,6 @@
 const { ses } = require('../services/AwsService');
 
-const generateEmailArguments = (from, to, subject, message) => {
+const createEmailParam = (from, to, subject, message) => {
   const mainEmail = process.env.MAIN_EMAIL;
 
   if (!from) {
@@ -34,5 +34,5 @@ const sendEmail = (params) => {
 
 module.exports = {
   sendEmail,
-  generateEmailArguments,
+  createEmailParam,
 };

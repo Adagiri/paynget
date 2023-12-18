@@ -12,7 +12,7 @@ async function getUserInfo(token) {
     }
     return null;
   } catch (error) {
-    console.log(error, 'error whilst verifying jwttoken');
+    // console.log(error, 'error whilst verifying jwttoken');
   }
 }
 

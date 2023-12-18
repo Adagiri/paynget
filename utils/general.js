@@ -111,10 +111,28 @@ module.exports.decrypt = (encryptedText) => {
 
   const decipher = crypto.createDecipheriv('aes-256-gcm', SECRET_KEY, iv);
   decipher.setAuthTag(tag); // Set the authentication tag for integrity checking.
-  let decrypted = decipher.update(encrypted, null, 'utf-8');
+  let decrypted = decipher.update(encrypted, 'hex', 'utf-8');
   decrypted += decipher.final('utf-8');
 
   return decrypted;
+};
+
+module.exports.decryptWalletBalance = (encryptedBalance) => {
+  try {
+    const decryptedBalance = this.decrypt(encryptedBalance);
+    return Number(decryptedBalance);
+  } catch (error) {
+    console.log(error);
+    throw 'Compromised wallet balance. Please contact management';
+  }
+};
+
+module.exports.encryptNewWalletBalance = (encryptedBalance, increment) => {
+  const decryptedWalletBalance = this.decryptWalletBalance(encryptedBalance);
+  const newWalletBalance = Number(decryptedWalletBalance) + Number(increment);
+  const encrypted = this.encrypt(newWalletBalance);
+
+  return encrypted;
 };
 
 module.exports.generateVerificationCode = (bytes, expiryInMins, codeLength) => {

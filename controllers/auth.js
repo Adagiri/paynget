@@ -15,6 +15,8 @@ const {
   generateEncryptedPin,
   generateVerificationCode,
   generateEncryptedPassword,
+  encrypt,
+  decryptWalletBalance,
 } = require('../utils/general');
 const { ErrorResponse, SuccessResponse } = require('../utils/responses');
 
@@ -36,6 +38,7 @@ module.exports.sendSignupCode = asyncHandler(async (_, args, context) => {
     args.signupCode = code;
     args.signupToken = encryptedToken;
     args.signupTokenExpiry = tokenExpiry;
+    args.walletBalance = encrypt('0');
 
     const user = await User.create(args);
     await sendSignupVerificationEmail({
@@ -89,6 +92,8 @@ module.exports.verifySignupCode = asyncHandler(async (_, args) => {
     isEmailVerified: false,
   });
 
+  user.walletBalance = decryptWalletBalance(user.walletBalance);
+
   return new SuccessResponse(200, true, user, authToken);
 });
 
@@ -99,6 +104,8 @@ module.exports.sendLoginCode = asyncHandler(async (_, args, context) => {
     email: email,
     isEmailVerified: true,
   }).select('+password');
+
+  console.log(user);
 
   if (!user) {
     return new ErrorResponse(404, 'Invalid credentials');
@@ -157,6 +164,8 @@ module.exports.verifyLoginCode = asyncHandler(async (_, args) => {
   user.loginTokenExpiry = undefined;
   await user.save();
   const authToken = getSignedJwtToken(user);
+
+  user.walletBalance = decryptWalletBalance(user.walletBalance);
 
   return new SuccessResponse(200, true, user, authToken);
 });

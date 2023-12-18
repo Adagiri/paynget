@@ -10,6 +10,11 @@ const TransactionSchema = new mongoose.Schema({
     required: true,
   },
 
+  transactionAmount: {
+    type: Number,
+    required: true,
+  },
+
   channel: {
     type: String,
     enum: ['card', 'bank_transfer'],
@@ -37,5 +42,7 @@ const TransactionSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
-
+/*
+description = ['Add_Card', 'Topup_Wallet']
+*/
 module.exports = mongoose.model('Transaction', TransactionSchema);

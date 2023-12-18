@@ -6,6 +6,11 @@ const UserSchema = new mongoose.Schema({
     required: true,
   },
 
+  walletBalance: {
+    type: String,
+    required: true,
+  },
+
   phone: {
     type: String,
     required: true,

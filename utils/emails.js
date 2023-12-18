@@ -1,4 +1,4 @@
-const { sendEmail, generateEmailArguments } = require('./messaging');
+const { sendEmail, createEmailParam } = require('./messaging');
 
 module.exports.sendSignupVerificationEmail = async ({ email, name, code }) => {
   const emailContent = `
@@ -48,7 +48,7 @@ module.exports.sendSignupVerificationEmail = async ({ email, name, code }) => {
   `;
 
   try {
-    const emailArgs = generateEmailArguments(
+    const emailArgs = createEmailParam(
       null,
       email,
       'Activate Your Payget Account',
@@ -102,7 +102,7 @@ module.exports.sendWelcomeEmail = async ({ name, email }) => {
   `;
 
   try {
-    const emailArgs = generateEmailArguments(
+    const emailArgs = createEmailParam(
       null,
       email,
       'Welcome to Payget',
@@ -162,7 +162,7 @@ module.exports.sendLoginConfirmationEmail = async ({ email, name, code }) => {
   `;
 
   try {
-    const emailArgs = generateEmailArguments(
+    const emailArgs = createEmailParam(
       null,
       email,
       'Login Confirmation Code',
@@ -222,7 +222,7 @@ module.exports.sendResetPinEmail = async ({ email, name, code }) => {
   `;
 
   try {
-    const emailArgs = generateEmailArguments(
+    const emailArgs = createEmailParam(
       null,
       email,
       'Reset Your Pin',
@@ -282,7 +282,7 @@ module.exports.sendResetPasswordEmail = async ({ email, name, code }) => {
   `;
 
   try {
-    const emailArgs = generateEmailArguments(
+    const emailArgs = createEmailParam(
       null,
       email,
       'Reset Your Password',
@@ -311,13 +311,13 @@ module.exports.sendErrorToDeveloper = async ({ subject, error }) => {
   try {
     const emailArgs = createEmailParam(
       null,
-      'learnsmart023@gmail.com',
+      'ibrahimridwan47@gmail.com',
       subject,
       message
     );
     await sendEmail(emailArgs);
   } catch (error) {
-    console.log(error, 'error whilst sending welcome message to user');
+    console.log(error, 'error whilst sending error message to developer');
   }
 };
 
